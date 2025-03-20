@@ -1,0 +1,71 @@
+#include <Arduino.h>
+#include "imu_sensor.h"
+#include "pid_controller.h"
+
+// IMU ve PID nesneleri
+IMUSensor imuSensor;
+PIDController pidRoll(PAngleRoll, IAngleRoll, DAngleRoll, -400, 400);
+PIDController pidPitch(PAnglePitch, IAnglePitch, DAnglePitch, -400, 400);
+// Motor pinleri
+#define MOTOR1_PIN 5
+#define MOTOR2_PIN 6
+#define MOTOR3_PIN 9
+#define MOTOR4_PIN 10
+
+void setup() {
+    Serial.begin(115200);
+    imuSensor.begin();
+
+    pinMode(MOTOR1_PIN, OUTPUT);
+    pinMode(MOTOR2_PIN, OUTPUT);
+    pinMode(MOTOR3_PIN, OUTPUT);
+    pinMode(MOTOR4_PIN, OUTPUT);
+}
+
+void loop() {
+    imuSensor.update();
+
+    float roll = imuSensor.getRollKF();
+    float pitch = imuSensor.getPitchKF();
+    float yaw = imuSensor.getYawKF();
+
+    float dt = 0.004;  // 4ms döngü süresi
+
+    // Hedef açılar (denge noktası)
+    float targetRoll = 0.0;
+    float targetPitch = 0.0;
+    float targetYaw = 0.0;
+
+    // PID ile düzeltme hesapla
+    float rollPID = pidRoll.compute(targetRoll, roll, dt);
+    float pitchPID = pidPitch.compute(targetPitch, pitch, dt);
+
+    // Motor hızlarını ayarla
+    int baseSpeed = 1500; // Orta hız (throttle)
+    
+    int motor1Speed = baseSpeed + rollPID + pitchPID ; // Ön sağ motor
+    int motor2Speed = baseSpeed - rollPID + pitchPID ; // Ön sol motor
+    int motor3Speed = baseSpeed - rollPID - pitchPID ; // Arka sol motor
+    int motor4Speed = baseSpeed + rollPID - pitchPID ; // Arka sağ motor
+
+    // Motor hızlarını sınırlıyoruz
+    motor1Speed = constrain(motor1Speed, 1000, 2000);
+    motor2Speed = constrain(motor2Speed, 1000, 2000);
+    motor3Speed = constrain(motor3Speed, 1000, 2000);
+    motor4Speed = constrain(motor4Speed, 1000, 2000);
+
+    // PWM ile motorlara hız gönder
+    analogWrite(MOTOR1_PIN, motor1Speed);
+    analogWrite(MOTOR2_PIN, motor2Speed);
+    analogWrite(MOTOR3_PIN, motor3Speed);
+    analogWrite(MOTOR4_PIN, motor4Speed);
+
+    // Seri ekrana verileri yazdır
+    Serial.print("Roll: "); Serial.print(roll);
+    Serial.print(" | Pitch: "); Serial.print(pitch);
+    Serial.print(" | Yaw: "); Serial.print(yaw);
+    Serial.print(" | RollPID: "); Serial.print(rollPID);
+    Serial.print(" | PitchPID: "); Serial.print(pitchPID);
+
+    delay(4);
+}

@@ -1,0 +1,37 @@
+#include <Arduino.h>
+#include <ESP32Servo.h>
+#include "motor_controller.h"
+
+// ESC pinleri
+#define ESC_PIN_1 18       // ESC1 için PWM çıkış pini
+#define ESC_PIN_2 19       // ESC2 için PWM çıkış pini
+#define ESC_PIN_3 21       // ESC3 için PWM çıkış pini
+#define ESC_PIN_4 22       // ESC4 için PWM çıkış pini
+
+// Motor Kontrolcü nesneleri
+MotorController motorController(ESC_PIN_1, ESC_PIN_2, ESC_PIN_3, ESC_PIN_4);
+
+void setup() {
+  Serial.begin(115200);  // Seri monitör başlatma
+  Serial.println("Başlatılıyor...");
+
+  // Motorları başlat
+  motorController.begin();
+
+  Serial.println("Motorlar başlatıldı!");
+}
+
+void loop() {
+  // 1000 ile 1400 arasında PWM sinyalini 100'er arttırarak gönder
+  for (int pwmValue = 1000; pwmValue <= 1400; pwmValue += 10) {
+    motorController.updateMotors(pwmValue, 0, 0); // sadece throttle (PWM) değeri, roll ve pitch PID sıfır
+
+    // PWM sinyalini seri monitöre yazdır
+    Serial.print("Motorlara gönderilen PWM: ");
+    Serial.println(pwmValue);
+
+    delay(500);  // PWM değerini 500ms bekleyerek gönder
+  }
+
+  // PWM değerleri 1400'e ulaştığında 1000'den tekrar başlayacak
+}

@@ -1,0 +1,62 @@
+#include <Arduino.h>
+#include "imu_sensor.h"
+#include "motor_controller.h"
+#include "pid_controller.h"
+
+// IMU ve Motor Kontrolcü nesneleri
+IMUSensor imuSensor;
+MotorController motorController(23, 19, 18, 5);  // Desteklenen pinler!
+
+// PID kontrolcüler
+PIDController pidRoll(2.0, 0.5, 0.007, -400, 400);
+PIDController pidPitch(2.0, 0.5, 0.007, -400, 400);
+
+// Throttle değeri (Başlangıçta orta seviye)
+int throttle = 1150;
+
+void setup() {
+    Serial.begin(115200);
+    Serial.println("Başlatılıyor...");
+
+    Serial.println("Wire başlatılıyor...");
+    Wire.begin();
+    Serial.println("Wire tamamlandı!");
+
+    Serial.println("IMU başlatılıyor...");
+    imuSensor.begin();
+    Serial.println("IMU tamamlandı!");
+
+    Serial.println("Motorlar başlatılıyor...");
+    motorController.begin();
+    Serial.println("Motorlar tamamlandı!");
+
+    Serial.println("Hover modu aktif!");
+}
+
+void loop() {
+    imuSensor.update(); // IMU verilerini güncelle
+
+    float roll = imuSensor.getRollKF();
+    float pitch = imuSensor.getPitchKF();
+
+    float dt = 0.004;  // 4ms döngü süresi 0.004 idi delay ile uyumlu olması için değiştirdim
+
+    // Hedef açılar (hover modunda 0 derece)
+    float targetRoll = 0.0;
+    float targetPitch = 0.0;
+
+    // PID ile düzeltme hesapla
+    float rollPID = pidRoll.compute(targetRoll, roll, dt);
+    float pitchPID = pidPitch.compute(targetPitch, pitch, dt);
+
+    // Motor hızlarını güncelle
+    motorController.updateMotors(throttle, rollPID, pitchPID);
+
+    // Seri monitöre IMU ve PID verilerini yazdır
+    Serial.print("Roll: "); Serial.print(roll);
+    Serial.print(" | Pitch: "); Serial.print(pitch);
+    Serial.print(" | RollPID: "); Serial.print(rollPID);
+    Serial.print(" | PitchPID: "); Serial.println(pitchPID);
+
+    delay(1000);
+}
