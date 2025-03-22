@@ -17,6 +17,7 @@ MotorController motorController(ESC_PIN_1, ESC_PIN_2, ESC_PIN_3, ESC_PIN_4);
 PIDController pidRoll(2.0, 0.5, 0.007, -400, 400);
 PIDController pidPitch(2.0, 0.5, 0.007, -400, 400);
 
+
 void setup() {
   Serial.begin(115200);  // Seri monitör başlatma
   Serial.println("Başlatılıyor...");
@@ -31,7 +32,15 @@ void setup() {
 
 void loop() {
   // IMU verilerini güncelle
+  Serial.println("IMU update çalıştı");
+  unsigned long start = micros();
+
   imuSensor.update();
+  unsigned long duration = micros() - start;
+
+
+
+
 
   // IMU'dan roll ve pitch açılarını al
   float roll = imuSensor.getRollKF();
@@ -49,17 +58,21 @@ void loop() {
   motorController.updateMotors(1200, rollPID, pitchPID);
 
   // Seri monitöre motor hızlarını yazdır
-  Serial.print("Roll: "); Serial.print(roll);
-  Serial.print(" | Pitch: "); Serial.print(pitch);
-  Serial.print(" | RollPID: "); Serial.print(rollPID);
-  Serial.print(" | PitchPID: "); Serial.println(pitchPID);
-  Serial.print("motor hızları"); Serial.println();
+  // Serial.print("Roll: "); Serial.print(roll);
+  // Serial.print(" | Pitch: "); Serial.print(pitch);
+  // Serial.print(" | RollPID: "); Serial.print(rollPID);
+  // Serial.print(" | PitchPID: "); Serial.println(pitchPID);
+  //Serial.print("motor hızları"); Serial.println();
 
-  Serial.print("Motor 1 PWM: "); Serial.println(motorController.motor1PWM);
-  Serial.print("Motor 2 PWM: "); Serial.println(motorController.motor2PWM);
-  Serial.print("Motor 3 PWM: "); Serial.println(motorController.motor3PWM);
-  Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
+  Serial.print("update() süresi: ");
+  Serial.print(duration);
+  Serial.println(" µs");
+
+  // Serial.print("Motor 1 PWM: "); Serial.println(motorController.motor1PWM);
+  // Serial.print("Motor 2 PWM: "); Serial.println(motorController.motor2PWM);
+  // Serial.print("Motor 3 PWM: "); Serial.println(motorController.motor3PWM);
+  // Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
   
 
-  delay(4);  // 50ms aralıkla güncelle 
+  delay(1000);  // 50ms aralıkla güncelle 
 }

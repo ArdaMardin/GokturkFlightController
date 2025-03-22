@@ -136,7 +136,7 @@ bool Mpu9250::Begin() {
     return false;
   }
   /* Set the DLPF to 184HZ by default */
-  if (!ConfigDlpfBandwidth(DLPF_BANDWIDTH_184HZ)) {
+  if (!ConfigDlpfBandwidth(DLPF_BANDWIDTH_10HZ)) {
     return false;
   }
   /* Set the SRD to 0 by default */

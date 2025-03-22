@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"path": "D:/WebProjects"
+		},
+		{
+			"name": "platform_first_try",
+			"path": "../../platform_first_try"
+		},
+		{
+			"name": "esp32_imu_test",
+			"path": "../../esp32_imu_test"
+		},
+		{
+			"name": "GokturkFlightController",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"array": "cpp",
+			"deque": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"vector": "cpp",
+			"string_view": "cpp",
+			"initializer_list": "cpp"
+		}
+	}
+}
