@@ -3,60 +3,75 @@
 #include "motor_controller.h"
 #include "pid_controller.h"
 
+// ESC pinleri
+#define ESC_PIN_1 18       // ESC1 için PWM çıkış pini
+#define ESC_PIN_2 19       // ESC2 için PWM çıkış pini
+#define ESC_PIN_3 21       // ESC3 için PWM çıkış pini
+#define ESC_PIN_4 22       // ESC4 için PWM çıkış pini
+
 // IMU ve Motor Kontrolcü nesneleri
 IMUSensor imuSensor;
-MotorController motorController(23, 19, 18, 5);  // Desteklenen pinler!
+MotorController motorController(ESC_PIN_1, ESC_PIN_2, ESC_PIN_3, ESC_PIN_4);
 
-// PID kontrolcüler
+// PID kontrolcülerini başlat
 PIDController pidRoll(2.0, 0.5, 0.007, -400, 400);
 PIDController pidPitch(2.0, 0.5, 0.007, -400, 400);
 
-// Throttle değeri (Başlangıçta orta seviye)
-int throttle = 1150;
 
 void setup() {
-    Serial.begin(115200);
-    Serial.println("Başlatılıyor...");
+  Serial.begin(115200);  // Seri monitör başlatma
+  Serial.println("Başlatılıyor...");
 
-    Serial.println("Wire başlatılıyor...");
-    Wire.begin();
-    Serial.println("Wire tamamlandı!");
+  // Motorları başlat
+  motorController.begin();
 
-    Serial.println("IMU başlatılıyor...");
-    imuSensor.begin();
-    Serial.println("IMU tamamlandı!");
-
-    Serial.println("Motorlar başlatılıyor...");
-    motorController.begin();
-    Serial.println("Motorlar tamamlandı!");
-
-    Serial.println("Hover modu aktif!");
+  // IMU'yu başlat
+  imuSensor.begin();
+  Serial.println("Motorlar ve IMU başlatıldı!");
 }
 
 void loop() {
-    imuSensor.update(); // IMU verilerini güncelle
+  Serial.println("IMU update çalıştı");
+  //unsigned long start = micros();   //imu süresi tutmak için aç 
 
-    float roll = imuSensor.getRollKF();
-    float pitch = imuSensor.getPitchKF();
+  imuSensor.update();
+  //unsigned long duration = micros() - start;   //imu süresi tutmak için aç 
+  // Serial.print("update() süresi: ");   //imu süresi tutmak için aç 
+  // Serial.print(duration);   //imu süresi tutmak için aç 
+  // Serial.println(" µs");   //imu süresi tutmak için aç 
 
-    float dt = 0.004;  // 4ms döngü süresi 0.004 idi delay ile uyumlu olması için değiştirdim
 
-    // Hedef açılar (hover modunda 0 derece)
-    float targetRoll = 0.0;
-    float targetPitch = 0.0;
 
-    // PID ile düzeltme hesapla
-    float rollPID = pidRoll.compute(targetRoll, roll, dt);
-    float pitchPID = pidPitch.compute(targetPitch, pitch, dt);
 
-    // Motor hızlarını güncelle
-    motorController.updateMotors(throttle, rollPID, pitchPID);
 
-    // Seri monitöre IMU ve PID verilerini yazdır
-    Serial.print("Roll: "); Serial.print(roll);
-    Serial.print(" | Pitch: "); Serial.print(pitch);
-    Serial.print(" | RollPID: "); Serial.print(rollPID);
-    Serial.print(" | PitchPID: "); Serial.println(pitchPID);
 
-    delay(1000);
+  // IMU'dan roll ve pitch açılarını al
+  float roll = imuSensor.getRollKF();
+  float pitch = imuSensor.getPitchKF();
+  
+  // Hedef açıları belirle (dengede durması için)
+  float targetRoll = 0.0;
+  float targetPitch = 0.0;
+
+  // PID hesaplamalarını yap
+  float rollPID = pidRoll.compute(targetRoll, roll, 0.004);  // 0.004, döngü süresi
+  float pitchPID = pidPitch.compute(targetPitch, pitch, 0.004);
+
+  // Motorlara PWM sinyali gönder
+  motorController.updateMotors(1200, rollPID, pitchPID);
+
+  // Seri monitöre motor hızlarını yazdır
+  // Serial.print("Roll: "); Serial.print(roll);
+  // Serial.print(" | Pitch: "); Serial.print(pitch);
+  // Serial.print(" | RollPID: "); Serial.print(rollPID);
+  // Serial.print(" | PitchPID: "); Serial.println(pitchPID);
+  //Serial.print("motor hızları"); Serial.println();
+
+  // Serial.print("Motor 1 PWM: "); Serial.println(motorController.motor1PWM);
+  // Serial.print("Motor 2 PWM: "); Serial.println(motorController.motor2PWM);
+  // Serial.print("Motor 3 PWM: "); Serial.println(motorController.motor3PWM);
+  // Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
+  
+
+  delay(1000);  // 50ms aralıkla güncelle 
 }
