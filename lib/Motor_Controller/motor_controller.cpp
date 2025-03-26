@@ -10,6 +10,8 @@ void MotorController::begin() {
     motor2.begin();
     motor3.begin();
     motor4.begin();
+    delay(1000);
+    Serial.println("motor attach tamamlandı");
 }
 
 void MotorController::arm() {
@@ -18,6 +20,8 @@ void MotorController::arm() {
     motor2.arm();
     motor3.arm();
     motor4.arm();
+    delay(5000);  
+    Serial.println("Motor Arm tamamlandı!");
 }
 
 void MotorController::updateMotors(int throttle, int rollPID, int pitchPID) {

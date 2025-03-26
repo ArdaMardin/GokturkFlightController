@@ -5,16 +5,16 @@ Motor::Motor(int pin) : motorPin(pin), speed(1000) {}
 
 void Motor::begin() {
     esc.attach(motorPin, 1000, 2000);  // ESC'yi bağla ve sinyal aralığını 1000-2000 µs olarak ayarla
-    esc.writeMicroseconds(1000);  // ESC'yi arm etmek için minimum sinyal gönder (1000 µs)
-    delay(5000);  // ESC'nin arm olmasını bekle (5 saniye)
-    Serial.println("begin kısmındaki motor arm edildi");
+    //esc.writeMicroseconds(1000);  // ESC'yi arm etmek için minimum sinyal gönder (1000 µs)
+    //delay(500);  // ESC'nin arm olmasını bekle (5 saniye)
+    
 }
 
 void Motor::arm() {
     // ESC'yi arm etmek için minimum sinyal gönder
     esc.writeMicroseconds(1000);  // Min throttle (1000 µs) gönder
-    delay(5000);  // ESC'nin arm olmasını bekle (5 saniye)
-    Serial.println("Motor Arm tamamlandı!");
+    //delay(5000);  // ESC'nin arm olmasını bekle (5 saniye)
+    
 }
 
 void Motor::setSpeed(int newSpeed) {

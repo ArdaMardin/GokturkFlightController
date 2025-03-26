@@ -15,9 +15,9 @@
 
 // ESC pinleri
 #define ESC_PIN_1 18       // ESC1 için PWM çıkış pini
-#define ESC_PIN_2 19       // ESC2 için PWM çıkış pini
-#define ESC_PIN_3 21       // ESC3 için PWM çıkış pini
-#define ESC_PIN_4 22       // ESC4 için PWM çıkış pini
+#define ESC_PIN_2 26       // ESC2 için PWM çıkış pini
+#define ESC_PIN_3 19       // ESC3 için PWM çıkış pini
+#define ESC_PIN_4 27       // ESC4 için PWM çıkış pini
 #define RC_CHANNEL_PIN 23 //KUMANDA CHANNEL PİNİ
 
 
@@ -82,6 +82,7 @@ void setup() {
  
   // Motorları başlat
   motorController.begin();
+  motorController.arm();
 
   // IMU'yu başlat
   imuSensor.begin();
@@ -138,5 +139,5 @@ void loop() {
   Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
   
 
-  delay(500);  // 50ms aralıkla güncelle 
+    // 50ms aralıkla güncelle 
 }
