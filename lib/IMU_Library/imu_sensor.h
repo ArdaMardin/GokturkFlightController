@@ -19,6 +19,8 @@ public:
     float getRollKF() const;
     float getPitchKF() const;
     float getYawKF() const;
+    //kalibre
+    void calibrateIMU();
 
 private:
     bfs::Mpu9250 imu;
@@ -28,6 +30,12 @@ private:
     float roll_cf, pitch_cf, yaw_cf;
     float roll_kf, pitch_kf, yaw_kf;
     float comp_filter_gain;
+    //kalibre etmek için gerekli değişkiler
+
+    float rollOffset = 0;
+    float pitchOffset = 0;
+    float rawRoll = 0;
+    float rawPitch = 0;
 
     // Dinamik olarak heap'te bellek ayırma işlemi
     Matrix2f *A;

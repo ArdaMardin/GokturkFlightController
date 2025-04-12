@@ -58,6 +58,10 @@ void IMUSensor::update() {
         float gx = imu.gyro_x_radps();
         float gy = imu.gyro_y_radps();
         float gz = imu.gyro_z_radps();
+        //kalibre etme işlemi
+        //rawRoll = roll_cf;
+        //rawPitch = pitch_cf;
+
 
         float ax_sq = ax * ax;
         float ay_sq = ay * ay;
@@ -82,14 +86,43 @@ void IMUSensor::update() {
         kalmanFilter(*x_roll, roll_acc);
         kalmanFilter(*x_pitch, pitch_acc);
         kalmanFilter(*x_yaw, gyro_yaw_delta);
-
-        roll_kf = x_roll->coeff(0);
-        pitch_kf = x_pitch->coeff(0);
+        //roll ve pitch offset değerleri kalibre etmek için çıkarıldı
+        roll_kf = x_roll->coeff(0) - rollOffset;
+        pitch_kf = x_pitch->coeff(0) - pitchOffset;
         yaw_kf = x_yaw->coeff(0);
+
+        rawRoll = x_roll->coeff(0);
+        rawPitch = x_pitch->coeff(0);
     }
 
 
 }
+
+void IMUSensor::calibrateIMU() {
+    Serial.println("IMU Kalibrasyonu başlıyor...");
+    
+    const int numSamples = 2000;
+    float rollSum = 0, pitchSum = 0;
+
+    // Zaman uyumlu örnekleme
+    for (int i = 0; i < numSamples; i++) {
+        update();  // IMU verilerini oku ve filtrele
+        rollSum += rawRoll;
+        pitchSum += rawPitch;
+        delay(2);
+    }
+
+    rollOffset = rollSum / numSamples;
+    pitchOffset = pitchSum / numSamples;
+
+    Serial.print("Kalibrasyon tamamlandı. Offset değerleri: Roll=");
+    Serial.print(rollOffset);
+    Serial.print(", Pitch=");
+    Serial.println(pitchOffset);
+}
+
+
+
 
 void IMUSensor::kalmanFilter(Vector2f &x, float z) {
     static Matrix2f I = Matrix2f::Identity();

@@ -86,9 +86,6 @@ void setup() {
 
   // IMU'yu başlat
   imuSensor.begin();
-  delay(2000);  // IMU'nun sabitlenmesini beklemek için
-  imuSensor.calibrateIMU();
-  Serial.println("Kalibrasyon tamamlandı!");
   Serial.println("Motorlar ve IMU başlatıldı!");
 }
 
@@ -132,17 +129,17 @@ void loop() {
   // Seri monitöre motor hızlarını yazdır
   // Serial.print("Roll: "); Serial.print(roll);
   // Serial.print(" | Pitch: "); Serial.print(pitch);
-  Serial.print(" | RollPID: "); Serial.print(rollPID);
-  Serial.print(" | PitchPID: "); Serial.println(pitchPID);
-  // Serial.print("motor hızları"); Serial.println();
-  //Serial.print("imu değerleri"); Serial.print(imuSensor.getRollKF());
-  //Serial.print(" | "); Serial.print(imuSensor.getPitchKF());
+  // Serial.print(" | RollPID: "); Serial.print(rollPID);
+  // Serial.print(" | PitchPID: "); Serial.println(pitchPID);
+  Serial.print("motor hızları"); Serial.println();
 
-  // Serial.print("Motor 1 PWM: "); Serial.println(motorController.motor1PWM);
-  // Serial.print("Motor 2 PWM: "); Serial.println(motorController.motor2PWM);
-  // Serial.print("Motor 3 PWM: "); Serial.println(motorController.motor3PWM);
-  // Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
-  delay(500);
+  Serial.print("Motor 1 PWM: "); Serial.println(motorController.motor1PWM);
+  Serial.print("Motor 2 PWM: "); Serial.println(motorController.motor2PWM);
+  Serial.print("Motor 3 PWM: "); Serial.println(motorController.motor3PWM);
+  Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
+
+
   
+  delay(400);
     // 50ms aralıkla güncelle 
 }
