@@ -1,0 +1,42 @@
+{
+	"folders": [
+		{
+			"path": "../../../../Desktop/Data_Structur"
+		},
+		{
+			"name": "GokturkFlightController",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"ostream": "cpp",
+			"array": "cpp",
+			"*.tcc": "cpp",
+			"deque": "cpp",
+			"list": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"vector": "cpp",
+			"string_view": "cpp",
+			"memory": "cpp",
+			"random": "cpp",
+			"initializer_list": "cpp",
+			"regex": "cpp",
+			"chrono": "cpp",
+			"format": "cpp",
+			"span": "cpp",
+			"text_encoding": "cpp",
+			"thread": "cpp",
+			"bitset": "cpp",
+			"charconv": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"functional": "cpp",
+			"type_traits": "cpp",
+			"bit": "cpp",
+			"concepts": "cpp"
+		}
+	}
+}
