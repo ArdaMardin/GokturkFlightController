@@ -10,6 +10,7 @@ private:
     float Kp, Ki, Kd;
     float prevError, integral;
     float outputMin, outputMax;
+    float prevDerivative;
 };
 
 // PID katsayıları burada tanımlanıyor
