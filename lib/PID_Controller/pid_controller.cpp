@@ -1,7 +1,7 @@
 #include "pid_controller.h"
 #include <cmath>
 // PID katsayıları
-float PAngleRoll = 2.0, IAngleRoll = 0.5, DAngleRoll = 0.007;
+float PAngleRoll = 1.55, IAngleRoll = 0.4, DAngleRoll = 0.05;
 float PAnglePitch = PAngleRoll, IAnglePitch = IAngleRoll, DAnglePitch = DAngleRoll;
 
 PIDController::PIDController(float kp, float ki, float kd, float outputMin, float outputMax) 

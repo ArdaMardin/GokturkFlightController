@@ -20,6 +20,30 @@
 #define ESC_PIN_4 27       // ESC4 için PWM çıkış pini
 #define RC_CHANNEL_PIN 23 //KUMANDA CHANNEL PİNİ
 
+//print komutları
+
+unsigned long lastLog = 0;
+
+void logToSerial(
+  int throttle,
+  float setpointRoll, float setpointPitch,
+  float roll, float pitch,
+  float rollPID, float pitchPID,
+  int m1, int m2, int m3, int m4) {
+
+Serial.print(throttle); Serial.print(",");
+Serial.print(setpointRoll); Serial.print(",");
+Serial.print(roll); Serial.print(",");
+Serial.print(rollPID); Serial.print(",");
+Serial.print(setpointPitch); Serial.print(",");
+Serial.print(pitch); Serial.print(",");
+Serial.print(pitchPID); Serial.print(",");
+Serial.print(m1); Serial.print(",");
+Serial.print(m2); Serial.print(",");
+Serial.print(m3); Serial.print(",");
+Serial.println(m4);
+}
+
 
 // IMU ve Motor Kontrolcü nesneleri
 IMUSensor imuSensor;
@@ -29,14 +53,16 @@ MotorController motorController(ESC_PIN_1, ESC_PIN_2, ESC_PIN_3, ESC_PIN_4);
 RCReceiver rcInput(RC_CHANNEL_PIN);
 
 // PID kontrolcülerini başlat
-PIDController pidRoll(2.0, 0.5, 0.007, -400, 400);
-PIDController pidPitch(2.0, 0.5, 0.007, -400, 400);
+PIDController pidRoll(1.55, 0.4, 0.005, -400, 400);
+PIDController pidPitch(1.55, 0.4, 0.005, -400, 400);
 
 
 void setup() {
   Serial.begin(115200);  // Seri monitör başlatma
   Serial.println("Başlatılıyor...");
   rcInput.begin();
+  Serial.println("Throttle,SetRoll,Roll,RollPID,SetPitch,Pitch,PitchPID,M1,M2,M3,M4");
+
   delay(1000);
 
 
@@ -93,10 +119,12 @@ void setup() {
 }
 
 void loop() {
+  unsigned long t0 = micros();
   //Serial.println("IMU update çalıştı");
   // unsigned long start = micros();   //imu süresi tutmak için aç 
 
   imuSensor.update();
+
   // unsigned long duration = micros() - start;   //imu süresi tutmak için aç 
   // Serial.print("update() süresi: ");   //imu süresi tutmak için aç 
   // Serial.print(duration);   //imu süresi tutmak için aç 
@@ -106,8 +134,8 @@ void loop() {
 
   int kumandapwm = rcInput.getNormalizedPWM(); // bu değeri istediğin gibi kullanabilirsin
 
-  Serial.print("RC PWM Çıkışı: ");
-  Serial.println(kumandapwm);
+  //Serial.print("RC PWM Çıkışı: ");
+  //Serial.println(kumandapwm);
 
 
 
@@ -123,8 +151,8 @@ void loop() {
   float targetPitch = 0.0;
 
   // PID hesaplamalarını yap
-  float rollPID = pidRoll.compute(targetRoll, roll, 0.004);  // 0.004, döngü süresi
-  float pitchPID = pidPitch.compute(targetPitch, pitch, 0.004);
+  float rollPID = pidRoll.compute(targetRoll, roll, 0.03);  // 0.004, döngü süresi
+  float pitchPID = pidPitch.compute(targetPitch, pitch, 0.03);
 
   // Motorlara PWM sinyali gönder
   motorController.updateMotors(kumandapwm, rollPID, pitchPID);
@@ -132,8 +160,8 @@ void loop() {
   // Seri monitöre motor hızlarını yazdır
   // Serial.print("Roll: "); Serial.print(roll);
   // Serial.print(" | Pitch: "); Serial.print(pitch);
-  Serial.print(" | RollPID: "); Serial.print(rollPID);
-  Serial.print(" | PitchPID: "); Serial.println(pitchPID);
+  //Serial.print(" | RollPID: "); Serial.print(rollPID);
+  //Serial.print(" | PitchPID: "); Serial.println(pitchPID);
   // Serial.print("motor hızları"); Serial.println();
   //Serial.print("imu değerleri"); Serial.print(imuSensor.getRollKF());
   //Serial.print(" | "); Serial.print(imuSensor.getPitchKF());
@@ -142,7 +170,22 @@ void loop() {
   // Serial.print("Motor 2 PWM: "); Serial.println(motorController.motor2PWM);
   // Serial.print("Motor 3 PWM: "); Serial.println(motorController.motor3PWM);
   // Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
-  delay(500);
+  unsigned long t1 = micros();
+
+
+  unsigned long sure = t1 - t0;
+
+  //Serial.print(sure); //imu süresi tutmak için aç
+  //Serial.print("µs");
   
-    // 50ms aralıkla güncelle 
+    logToSerial(
+                kumandapwm,
+                targetRoll, targetPitch,
+                roll, pitch,
+                rollPID, pitchPID,
+                motorController.motor1PWM,
+                motorController.motor2PWM,
+                motorController.motor3PWM,
+                motorController.motor4PWM);
+
 }
