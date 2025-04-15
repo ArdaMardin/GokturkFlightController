@@ -4,14 +4,17 @@
 #include <Arduino.h>
 
 class RCReceiver {
-private:
-    int channelPin;
-
 public:
     RCReceiver(int pin);
     void begin();
-    int readRawPWM();         // Gerçek gelen pulse (örneğin: 1472us)
-    int getNormalizedPWM();   // ESC benzeri normalize edilmiş çıkış (1000-2000 arası)
+    int getRawPWM() const;         // Ölçülen gerçek PWM genişliği (us)
+    int getNormalizedPWM() const;  // 1000–2000 arası normalize edilmiş değer
+
+private:
+    static void IRAM_ATTR handleInterrupt(); // Statik ISR
+    static volatile unsigned long pulseStart;
+    static volatile int pulseWidth;
+    int pin;
 };
 
 #endif
