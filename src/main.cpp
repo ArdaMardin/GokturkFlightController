@@ -2,8 +2,7 @@
 #include "imu_sensor.h"
 #include "motor_controller.h"
 #include "pid_controller.h"
-#include <WiFi.h>
-#include <SPIFFS.h>
+
 //#include <ESPAsyncWebServer.h> //webserver kütüphaneleri
 //#include <ArduinoJson.h>  //webserver kütüphaneleri
 #include "RCReceiver.h"
@@ -65,6 +64,12 @@ void setup() {
 
   delay(1000);
 
+    // IMU'yu başlat
+    imuSensor.begin();
+    delay(2000);  // IMU'nun sabitlenmesini beklemek için
+    imuSensor.calibrateIMU();
+    Serial.println("Kalibrasyon tamamlandı!");
+
 
     // // WiFi başlat
     // WiFi.begin(ssid, password);
@@ -107,14 +112,12 @@ void setup() {
 
  
   // Motorları başlat
+  Serial.println("motorlar başlatılıyor");
+
   motorController.begin();
   motorController.arm();
 
-  // IMU'yu başlat
-  imuSensor.begin();
-  delay(2000);  // IMU'nun sabitlenmesini beklemek için
-  imuSensor.calibrateIMU();
-  Serial.println("Kalibrasyon tamamlandı!");
+
   Serial.println("Motorlar ve IMU başlatıldı!");
 }
 
@@ -149,10 +152,10 @@ void loop() {
   // Hedef açıları belirle (dengede durması için)
   float targetRoll = 0.0;
   float targetPitch = 0.0;
-
+  float imudt = imuSensor.getDt();
   // PID hesaplamalarını yap
-  float rollPID = pidRoll.compute(targetRoll, roll, 0.03);  // 0.004, döngü süresi
-  float pitchPID = pidPitch.compute(targetPitch, pitch, 0.03);
+  float rollPID = pidRoll.compute(targetRoll, roll, 0.003);  // 0.003, döngü süresi geri çevirebiliriz
+  float pitchPID = pidPitch.compute(targetPitch, pitch, 0.003);
 
   // Motorlara PWM sinyali gönder
   motorController.updateMotors(kumandapwm, rollPID, pitchPID);
