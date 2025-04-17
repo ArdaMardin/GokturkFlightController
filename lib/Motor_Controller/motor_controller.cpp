@@ -92,3 +92,10 @@ void MotorController::updateMotors(int throttle, int rollPID, int pitchPID) {
     // motor3.setSpeed(motor3PWM);
     // motor4.setSpeed(motor4PWM);
 }
+
+void MotorController::stopAllMotors() {
+    motor1.setSpeed(1000);
+    motor2.setSpeed(1000);
+    motor3.setSpeed(1000);
+    motor4.setSpeed(1000);
+}
