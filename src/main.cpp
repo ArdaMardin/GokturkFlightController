@@ -22,6 +22,9 @@
 //print komutları
 
 unsigned long lastLog = 0;
+unsigned long lastLoopTime = 0;
+
+const unsigned long loopIntervalMicros = 4000; 
 
 void logToSerial(
   int throttle,
@@ -122,8 +125,10 @@ void setup() {
 }
 
 void loop() {
-  unsigned long t0 = micros();
-  //Serial.println("IMU update çalıştı");
+  unsigned long currentTime = micros();
+  if (currentTime - lastLoopTime < loopIntervalMicros) return;
+   
+  float dt = (currentTime - lastLoopTime) / 1000000.0f;  //Serial.println("IMU update çalıştı");
   // unsigned long start = micros();   //imu süresi tutmak için aç 
 
   imuSensor.update();
@@ -139,7 +144,14 @@ void loop() {
 
   //Serial.print("RC PWM Çıkışı: ");
   //Serial.println(kumandapwm);
+  bool failsafe = (kumandapwm < 900 || kumandapwm > 2100); //kumanda kapanma durumu için failsafe
 
+  if (failsafe) {
+    motorController.stopAllMotors();
+    Serial.println("Failsafe aktif! Kumanda sinyali alınamıyor.");
+    lastLoopTime = currentTime;
+    return;
+}
 
 
 
@@ -148,14 +160,14 @@ void loop() {
   // IMU'dan roll ve pitch açılarını al
   float roll = imuSensor.getRollKF();
   float pitch = imuSensor.getPitchKF();
-  
+
   // Hedef açıları belirle (dengede durması için)
   float targetRoll = 0.0;
   float targetPitch = 0.0;
-  float imudt = imuSensor.getDt();
+
   // PID hesaplamalarını yap
-  float rollPID = pidRoll.compute(targetRoll, roll, 0.003);  // 0.003, döngü süresi geri çevirebiliriz
-  float pitchPID = pidPitch.compute(targetPitch, pitch, 0.003);
+  float rollPID = pidRoll.compute(targetRoll, roll, dt);  // 0.004, döngü süresi
+  float pitchPID = pidPitch.compute(targetPitch, pitch, dt);
 
   // Motorlara PWM sinyali gönder
   motorController.updateMotors(kumandapwm, rollPID, pitchPID);
@@ -173,10 +185,9 @@ void loop() {
   // Serial.print("Motor 2 PWM: "); Serial.println(motorController.motor2PWM);
   // Serial.print("Motor 3 PWM: "); Serial.println(motorController.motor3PWM);
   // Serial.print("Motor 4 PWM: "); Serial.println(motorController.motor4PWM);
-  unsigned long t1 = micros();
+  //unsigned long t1 = micros();
 
 
-  unsigned long sure = t1 - t0;
 
   //Serial.print(sure); //imu süresi tutmak için aç
   //Serial.print("µs");
@@ -190,5 +201,11 @@ void loop() {
                 motorController.motor2PWM,
                 motorController.motor3PWM,
                 motorController.motor4PWM);
+
+      //Serial.println(String(imuSensor.getRawRoll()) + ",");
+
+
+                lastLoopTime = currentTime;
+
 
 }
