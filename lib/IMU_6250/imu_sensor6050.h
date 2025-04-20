@@ -21,6 +21,8 @@ public:
     float getPitchKF() const;
     float getYawKF() const;
     float getDt() const;
+    float getRollFiltered()  const { return roll_filtered; }
+    float getPitchFiltered() const { return pitch_filtered; }
     //kalibre
     void calibrateIMU();
 
@@ -38,7 +40,20 @@ private:
     float pitchOffset = 0;
     float rawRoll = 0;
     float rawPitch = 0;
+    
+    float roll_filtered  = 0;
+    float pitch_filtered = 0;
+    float vib_alpha;                      // artık constexpr değil
+    static constexpr float vib_fc = 1.0f; // EMA kesim frekansı [Hz]
+    static constexpr float vib_fs = 250.0f; // örnekleme hızı [Hz]
 
+    // Notch filtresi için
+    float z1_roll = 0, z2_roll = 0;
+    float z1_pitch = 0, z2_pitch = 0;
+    float b0, b1, b2, a1, a2;
+    void initNotch();
+    float applyNotchRoll(float x);
+    float applyNotchPitch(float x);
     // Dinamik olarak heap'te bellek ayırma işlemi
     Matrix2f *A;
     Vector2f *x_roll, *x_pitch, *x_yaw;

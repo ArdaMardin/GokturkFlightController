@@ -1,9 +1,11 @@
 #include "imu_sensor6050.h"
 
-IMUSensor::IMUSensor() : prevTime(0), t(0.004), comp_filter_gain(0.990), R(0.005), Q(0.01) {
+IMUSensor::IMUSensor() : prevTime(0), t(0.004), comp_filter_gain(1), R(0.001), Q(0.005) {
     roll_cf = pitch_cf = yaw_cf = 0;
     roll_kf = pitch_kf = yaw_kf = 0;
-
+    vib_alpha = expf(-2.0f * M_PI * vib_fc / vib_fs);
+    roll_filtered = pitch_filtered = 0;
+    z1_roll = z2_roll = z1_pitch = z2_pitch = 0;
     // Dinamik bellek tahsisi
     A = new Matrix2f();
     x_roll = new Vector2f();
@@ -31,7 +33,7 @@ void IMUSensor::begin() {
     // I2C başlat ve hızını 400 kHz yap
     Wire.begin();
     Wire.setClock(400000);
-
+    initNotch();
     // MPU6050 başlat
     if (!imu.begin()) {
       Serial.println("MPU6050 bulunamadı!");
@@ -52,6 +54,36 @@ void IMUSensor::begin() {
     Wire.endTransmission();
 
     Serial.println("MPU6050 başlatıldı: I2C=400 kHz, 250 Hz örnekleme, DLPF=260 Hz");
+}
+
+void IMUSensor::initNotch() {
+    const float f0 = 2.9410f; // Notch merkez frekansı [Hz]
+    const float bw = 0.5f;    // Çentik bant genişliği [Hz]
+
+    float w0    = 2 * M_PI * f0 / vib_fs;
+    float alpha = sin(w0) * sinh( log(2.0f)/2 * bw * w0 / sin(w0) );
+    float cosw0 = cos(w0);
+    float A0    = 1 + alpha;
+
+    b0 =  (1 + cosw0) / 2 / A0;
+    b1 = -(1 + cosw0)     / A0;
+    b2 =  (1 + cosw0) / 2 / A0;
+    a1 = -2 * cosw0       / A0;
+    a2 =  (1 - alpha)     / A0;
+}
+
+float IMUSensor::applyNotchRoll(float x) {
+    float y = b0*x + b1*z1_roll + b2*z2_roll - a1*z1_roll - a2*z2_roll;
+    z2_roll = z1_roll;
+    z1_roll = y;
+    return y;
+}
+
+float IMUSensor::applyNotchPitch(float x) {
+    float y = b0*x + b1*z1_pitch + b2*z2_pitch - a1*z1_pitch - a2*z2_pitch;
+    z2_pitch = z1_pitch;
+    z1_pitch = y;
+    return y;
 }
 
 
@@ -101,6 +133,11 @@ void IMUSensor::update() {
   
     rawRoll  = x_roll->coeff(0);
     rawPitch = x_pitch->coeff(0);
+    float roll_notched  = applyNotchRoll(roll_kf);
+    float pitch_notched = applyNotchPitch(pitch_kf);
+  
+    roll_filtered  = vib_alpha * roll_filtered  + (1 - vib_alpha) * roll_notched;
+    pitch_filtered = vib_alpha * pitch_filtered + (1 - vib_alpha) * pitch_notched;
   }
   
 
@@ -177,18 +214,6 @@ float IMUSensor::getPitchKF() const {
 
 float IMUSensor::getYawKF() const {
     return yaw_kf;
-}
-
-float IMUSensor::getRollCF() const {
-    return roll_cf;
-}
-
-float IMUSensor::getPitchCF() const {
-    return pitch_cf;
-}
-
-float IMUSensor::getYawCF() const {
-    return yaw_cf;
 }
 
 float IMUSensor::getDt() const {

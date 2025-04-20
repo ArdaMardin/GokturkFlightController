@@ -158,8 +158,8 @@ void loop() {
 
 
   // IMU'dan roll ve pitch açılarını al
-  float roll = imuSensor.getRollKF();
-  float pitch = imuSensor.getPitchKF();
+   float roll  = imuSensor.getRollFiltered();
+   float pitch = imuSensor.getPitchFiltered();
 
   // Hedef açıları belirle (dengede durması için)
   float targetRoll = 0.0;
