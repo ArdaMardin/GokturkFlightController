@@ -13,6 +13,8 @@ public:
     int lastM1 = 1000, lastM2 = 1000, lastM3 = 1000, lastM4 = 1000;
     const int SLEW_RATE = 10;     // µs döngü başına izin verilen max değişim
     const int DEADBAND  = 10;     // µs altındaki değişimleri ihmal et
+    void stopAllMotors();
+
 
 private:
     Motor motor1, motor2, motor3, motor4;

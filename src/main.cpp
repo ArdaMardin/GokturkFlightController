@@ -144,6 +144,7 @@ void loop() {
 
   //Serial.print("RC PWM Çıkışı: ");
   //Serial.println(kumandapwm);
+<<<<<<< HEAD
   // bool failsafe = (kumandapwm < 900 || kumandapwm > 2100); //kumanda kapanma durumu için failsafe
 
 //   if (failsafe) {
@@ -152,14 +153,29 @@ void loop() {
 //     lastLoopTime = currentTime;
 //     return;
 // }
+=======
+  bool failsafe = (kumandapwm < 900 || kumandapwm > 2100); //kumanda kapanma durumu için failsafe
+
+  if (failsafe) {
+    motorController.stopAllMotors();
+    Serial.println("Failsafe aktif! Kumanda sinyali alınamıyor.");
+    lastLoopTime = currentTime;
+    return;
+}
+>>>>>>> 5e44da70fe9839026d4c837aa923f1567a33e708
 
 
 
 
 
   // IMU'dan roll ve pitch açılarını al
+<<<<<<< HEAD
    float roll  = imuSensor.getRollFiltered();
    float pitch = imuSensor.getPitchFiltered();
+=======
+  float roll = imuSensor.getRollKF();
+  float pitch = imuSensor.getPitchKF();
+>>>>>>> 5e44da70fe9839026d4c837aa923f1567a33e708
 
   // Hedef açıları belirle (dengede durması için)
   float targetRoll = 0.0;
@@ -208,4 +224,8 @@ void loop() {
                 lastLoopTime = currentTime;
 
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 5e44da70fe9839026d4c837aa923f1567a33e708
