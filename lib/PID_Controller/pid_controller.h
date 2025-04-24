@@ -4,7 +4,7 @@
 class PIDController {
 public:
     PIDController(float kp, float ki, float kd, float outputMin, float outputMax);
-    float compute(float setpoint, float measured, float dt);
+    float compute(float setpoint, float measured, double dt);
 
 private:
     float Kp, Ki, Kd;

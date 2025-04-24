@@ -23,7 +23,8 @@
 
 unsigned long lastLog = 0;
 unsigned long lastLoopTime = 0;
-
+unsigned long lastValidPWMTime = 0;
+const unsigned long failsafeTimeout = 500; // ms
 const unsigned long loopIntervalMicros = 4000; 
 
 void logToSerial(
@@ -32,6 +33,8 @@ void logToSerial(
   float roll, float pitch,
   float rollPID, float pitchPID,
   int m1, int m2, int m3, int m4) {
+
+Serial.print(millis()); Serial.print(",");
 
 Serial.print(throttle); Serial.print(",");
 Serial.print(setpointRoll); Serial.print(",");
@@ -55,15 +58,17 @@ MotorController motorController(ESC_PIN_1, ESC_PIN_2, ESC_PIN_3, ESC_PIN_4);
 RCReceiver rcInput(RC_CHANNEL_PIN);
 
 // PID kontrolcülerini başlat
-PIDController pidRoll(1.55, 0.4, 0.005, -400, 400);
-PIDController pidPitch(1.55, 0.4, 0.005, -400, 400);
+PIDController pidRoll(1.0f, 0.167f, -0.01f, -400 , 400);
+PIDController pidPitch(2.0f, 0.5f, -0.01f, -400, 400);
+
+
 
 
 void setup() {
   Serial.begin(115200);  // Seri monitör başlatma
   Serial.println("Başlatılıyor...");
   rcInput.begin();
-  Serial.println("Throttle,SetRoll,Roll,RollPID,SetPitch,Pitch,PitchPID,M1,M2,M3,M4");
+  Serial.println("Millis,Throttle,SetRoll,Roll,RollPID,SetPitch,Pitch,PitchPID,M1,M2,M3,M4");
 
   delay(1000);
 
@@ -128,7 +133,7 @@ void loop() {
   unsigned long currentTime = micros();
   if (currentTime - lastLoopTime < loopIntervalMicros) return;
    
-  float dt = (currentTime - lastLoopTime) / 1000000.0f;  //Serial.println("IMU update çalıştı");
+  double dt = (currentTime - lastLoopTime) / 1000000.0f;  //Serial.println("IMU update çalıştı");
   // unsigned long start = micros();   //imu süresi tutmak için aç 
 
   imuSensor.update();
@@ -144,49 +149,45 @@ void loop() {
 
   //Serial.print("RC PWM Çıkışı: ");
   //Serial.println(kumandapwm);
-<<<<<<< HEAD
+
   // bool failsafe = (kumandapwm < 900 || kumandapwm > 2100); //kumanda kapanma durumu için failsafe
 
-//   if (failsafe) {
-//     motorController.stopAllMotors();
-//     Serial.println("Failsafe aktif! Kumanda sinyali alınamıyor.");
-//     lastLoopTime = currentTime;
-//     return;
-// }
-=======
-  bool failsafe = (kumandapwm < 900 || kumandapwm > 2100); //kumanda kapanma durumu için failsafe
+  //   if (failsafe) {
+  //     motorController.stopAllMotors();
+  //     Serial.println("Failsafe aktif! Kumanda sinyali alınamıyor.");
+  //     lastLoopTime = currentTime;
+  //     return;
+  // }
 
-  if (failsafe) {
-    motorController.stopAllMotors();
-    Serial.println("Failsafe aktif! Kumanda sinyali alınamıyor.");
-    lastLoopTime = currentTime;
-    return;
-}
->>>>>>> 5e44da70fe9839026d4c837aa923f1567a33e708
+  // if (kumandapwm > 950 && kumandapwm < 2100) {
+  //   lastValidPWMTime = millis();  // Geçerli sinyal geldiyse zamanı güncelle
+  // }
+  
+  // if (millis() - lastValidPWMTime > failsafeTimeout) {
+  //   motorController.stopAllMotors();
+  //   Serial.println("FAILSAFE: Kumanda sinyali 500ms'yi geçti!");
+  //   lastLoopTime = micros(); // döngü tekrar etmesin
+  //   return;
+  // }
 
 
 
 
 
   // IMU'dan roll ve pitch açılarını al
-<<<<<<< HEAD
+
    float roll  = imuSensor.getRollFiltered();
    float pitch = imuSensor.getPitchFiltered();
-=======
-  float roll = imuSensor.getRollKF();
-  float pitch = imuSensor.getPitchKF();
->>>>>>> 5e44da70fe9839026d4c837aa923f1567a33e708
-
   // Hedef açıları belirle (dengede durması için)
-  float targetRoll = 0.0;
-  float targetPitch = 0.0;
+    float targetRoll = 0.0;
+    float targetPitch = 0.0;
 
   // PID hesaplamalarını yap
-  float rollPID = pidRoll.compute(targetRoll, roll, dt);  // 0.004, döngü süresi
-  float pitchPID = pidPitch.compute(targetPitch, pitch, dt);
+    float rollPID = pidRoll.compute(targetRoll, roll, dt);  // 0.004, döngü süresi
+    float pitchPID = pidPitch.compute(targetPitch, pitch, dt);
 
   // Motorlara PWM sinyali gönder
-  motorController.updateMotors(kumandapwm, rollPID, pitchPID);
+    motorController.updateMotors(kumandapwm, rollPID, pitchPID);
 
   // Seri monitöre motor hızlarını yazdır
   // Serial.print("Roll: "); Serial.print(roll);
@@ -207,6 +208,7 @@ void loop() {
 
   //Serial.print(sure); //imu süresi tutmak için aç
   //Serial.print("µs");
+
   
     logToSerial(
                 kumandapwm,
@@ -224,8 +226,8 @@ void loop() {
                 lastLoopTime = currentTime;
 
 
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> 5e44da70fe9839026d4c837aa923f1567a33e708
+
+
+

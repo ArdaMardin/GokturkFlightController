@@ -34,6 +34,7 @@ void IMUSensor::begin() {
     Wire.begin();
     Wire.setClock(400000);
     initNotch();
+    
     // MPU6050 başlat
     if (!imu.begin()) {
       Serial.println("MPU6050 bulunamadı!");
@@ -57,7 +58,7 @@ void IMUSensor::begin() {
 }
 
 void IMUSensor::initNotch() {
-    const float f0 = 2.9410f; // Notch merkez frekansı [Hz]
+     float f0= 2.9410f; // Notch merkez frekansı [Hz]
     const float bw = 0.5f;    // Çentik bant genişliği [Hz]
 
     float w0    = 2 * M_PI * f0 / vib_fs;
