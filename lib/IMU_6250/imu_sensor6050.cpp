@@ -24,10 +24,6 @@ IMUSensor::IMUSensor() : prevTime(0), t(0.004), comp_filter_gain(1), R(0.001), Q
     *P = Matrix2f::Identity();
 }
 
- //bool IMUSensor::pingIMU() {
-//     Wire.beginTransmission(bfs::Mpu9250::I2C_ADDR_PRIM);
-//     return (Wire.endTransmission() == 0);
-// }
 #define MPU6050_ADDRESS 0x68
 void IMUSensor::begin() {
     // I2C başlat ve hızını 400 kHz yap
