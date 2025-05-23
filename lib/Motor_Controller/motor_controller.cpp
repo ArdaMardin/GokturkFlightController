@@ -83,18 +83,6 @@ void MotorController::updateMotors(int throttle, int rollPID, int pitchPID) {
     motor3.setSpeed(constrain(c3, IDLE_THR, MAX_THR));
     motor4.setSpeed(constrain(c4, IDLE_THR, MAX_THR));
     
-
-    
-    // int baseSpeed = constrain(throttle, 1000, 2000);
-    // motor1PWM = baseSpeed+ rollPID + pitchPID;
-    // motor2PWM = baseSpeed- rollPID + pitchPID;
-    // motor3PWM = baseSpeed- rollPID - pitchPID;
-    // motor4PWM = baseSpeed+ rollPID - pitchPID;
-
-    // motor1.setSpeed(motor1PWM);
-    // motor2.setSpeed(motor2PWM);
-    // motor3.setSpeed(motor3PWM);
-    // motor4.setSpeed(motor4PWM);
 }
 
 void MotorController::stopAllMotors() {
